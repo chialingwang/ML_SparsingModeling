@@ -21,14 +21,14 @@ def ImagePatchProcessing(path, patch_size):
 				for dj in range(-half_patch_size, half_patch_size+1):
 					m = (i+M+di)%M
 					n = (j+N+dj)%N
-					patch_array.append(im_array[m*M+n])
+					feature_array.append(im_array[m*M+n])
 				# end for
 			# end for
 			#print(patch_array)
-			feature_array.append(patch_array)
+			#feature_array.append(patch_array)
 		# end for
 	# end for	
 	return feature_array
 
 
-ImagePatchProcessing("01-002.png", 3)
+#ImagePatchProcessing("01-002.png", 3)
