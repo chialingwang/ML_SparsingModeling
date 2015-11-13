@@ -83,9 +83,10 @@ def load_data(filelist , patch):
         #print(sample)
         read_file = []
         read_file = read_fileName(filename , patch)
-        record['filename'].append(filename)
-        record['target'].append(sample)
-        record['data'].append(read_file)
+        for element in read_file:
+            record['filename'].append(filename)
+            record['target'].append(sample)
+            record['data'].append(element)
 
         #print(read_file[0])
         #print(len(read_file))
