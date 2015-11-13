@@ -3,8 +3,7 @@ import os.path
 import struct
 import re
 
-pwd = os.pardir;
-accessPath = r"%s\patch_database_double" %pwd;
+
 
 '''
 def read_single(sample, image , patchSize):
@@ -23,9 +22,9 @@ def read_single(sample, image , patchSize):
     return result
 '''
 
-def read_fileName(file , size):
+def read_fileName_double(file , size):
     result = []
-    f = open(r'%s\%s' %( accessPath , file), 'rb+')
+    f = open(r'%s' %(file), 'rb+')
 #    print(f)
     read_data = f.read();
     n = size*size
@@ -49,6 +48,29 @@ def read_fileName(file , size):
             count = 0
     return result
 
+def read_fileName(file , size):
+    result = []
+    f = open(r'%s' %(file), 'rb+')
+#    print(f)
+    read_data = f.read();
+    n = size*size
+    #for i in read_data:
+    #    print(i);
+    count = 0
+    temp = []
+    lable = []
+#    for i in range(0 , 24 , 8):
+    for i in range(0 , len(read_data)):
+       
+        data = read_data[i]
+#        print(data[0])
+        temp.append(data)
+        count += 1
+        if(count == n):
+            result.append(temp)
+            temp = []
+            count = 0
+    return result
 
 #print(train[10])
 def load_data(filelist , patch):
