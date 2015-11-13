@@ -1,6 +1,7 @@
 import os, sys
 import os.path
 import struct
+import re
 
 pwd = os.pardir;
 accessPath = r"%s\patch_database_double" %pwd;
@@ -25,20 +26,45 @@ def read_single(sample, image , patchSize):
 def read_fileName(file , size):
     result = []
     f = open(r'%s\%s' %( accessPath , file), 'rb+')
+#    print(f)
     read_data = f.read();
     n = size*size
     #for i in read_data:
     #    print(i);
     count = 0
     temp = []
+    lable = []
+#    for i in range(0 , 24 , 8):
     for i in range(0 , len(read_data) , 8):
        
         b = read_data[i:i+8]
+#        print(b)
         data = struct.unpack('d', b)
-        temp.append(data)
+#        print(data[0])
+        temp.append(data[0])
         count += 1
         if(count == n):
-            temp = []
             result.append(temp)
+            temp = []
             count = 0
     return result
+
+
+#print(train[10])
+def load_data(filelist , patch):
+
+    record = dict([('data', []), ('target', []), ('filename', [])])
+    for filename in filelist:
+        new_name = filename.split('\\')[2].split('_')[0]
+        #print(new_name)           
+        sample = int(re.findall(r'\d+', new_name)[0])
+        #print(sample)
+        read_file = []
+        read_file = read_fileName(filename , patch)
+        record['filename'].append(filename)
+        record['target'].append(sample)
+        record['data'].append(read_file)
+
+        #print(read_file[0])
+        #print(len(read_file))
+    return record
