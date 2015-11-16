@@ -51,8 +51,8 @@ def kmeans(data, k   ,rng, T = 50  , method = 'kmeans' ):
     else:
         centroids = ramdon_centroids(data, centroids , k  ,rng)
         #centroids = [[0,0], [0,0.01], [0.01,0]]
-#    print("inital centroids")
-#    print(centroids)
+    print("inital centroids")
+    print(centroids)
     old_centroids = [[] for i in range(k)]
     #    result_dict = {}
     Iteration = 0
