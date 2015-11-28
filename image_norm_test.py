@@ -74,7 +74,7 @@ def read_fileName(file , size):
 
 #print(train[10])
 def load_data(filelist , patch):
-
+    file_target = []
     record = dict([('data', []), ('target', []), ('filename', [])])
     for filename in filelist:
         new_name = filename.split('\\')[2].split('_')[0]
@@ -83,6 +83,7 @@ def load_data(filelist , patch):
         #print(sample)
         read_file = []
         read_file = read_fileName(filename , patch)
+        file_target.append(sample)
         for element in read_file:
             record['filename'].append(filename)
             record['target'].append(sample)
@@ -90,4 +91,22 @@ def load_data(filelist , patch):
 
         #print(read_file[0])
         #print(len(read_file))
-    return record
+    return record , file_target
+
+def load_sig_data(filename , patch):
+    file_target = []
+    record = dict([('data', []), ('target', []), ('filename', [])])
+    new_name = filename.split('\\')[2].split('_')[0]
+    sample = int(re.findall(r'\d+', new_name)[0])
+        #print(sample)
+    read_file = []
+    read_file = read_fileName(filename , patch)
+    file_target.append(sample)
+    for element in read_file:
+        record['filename'].append(filename)
+        record['target'].append(sample)
+        record['data'].append(element)
+
+        #print(read_file[0])
+        #print(len(read_file))
+    return record , file_target
