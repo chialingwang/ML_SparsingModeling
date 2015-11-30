@@ -118,10 +118,11 @@ class my_svm(object):
         m = np.dot(grad,grad)
         t = -c*m
         j = 0
-        new_obj = self.compute_obj(w+step*grad)
         while(j < iter):
-            if((obj-new_obj < t*step) ):
-                step = ta*step
+            new_obj = self.compute_obj(w+step*grad)
+            if((obj-new_obj >= t*step) ):
+                break
+            step = ta*step
             j += 1
         return step
     
@@ -156,14 +157,15 @@ class my_svm(object):
             w_result.append(list(self.w))
             i += 1
             if(self.stop.value == 2 ): # stop when opt
-                if(np.linalg.norm(gradF)<self.e):
+                new_obj = self.compute_obj(self.w)
+                if(np.linalg.norm(new_obj-obj)<self.e):
                     print("break because stop criteria II at iteration :" , i )
                     break
                 
             if(self.stop.value == 3) : # stop when good perform
 
                 tol = 0.9
-                error = self.predict(pickX , picky, self.w)
+                error = self.predict(pickX , picky)
                 if(error <= tol*min_err):
                     min_err = error
                 else :
@@ -176,25 +178,37 @@ class my_svm(object):
     def my_sgd(self, X, y,**kwargs):
         self.X =X
         self.y =y
+        self.C = kwargs.get('C', 1)
         self.n = len(X)
-        step = kwargs.get('step', 0.11)
-        t0 = kwargs.get('t0', 0)
+        obj_result = []
+        w_result = []
+        step_result= []
+        back_track = False
         self.w = np.zeros(self.X.shape[1])
         self.stop = kwargs.get('stop', stop.iter)
+        step = kwargs.get('step', 0.11)
+        t0 = kwargs.get('t0', 0)
+        seed = kwargs.get('seed', 371986)
         i = 0
         min_err = sys.maxsize
         rng = np.random.RandomState(seed)
+        stop_sign = False
         if(self.stop.value == 3) :
             valid_len = 10
             pickX , picky = self.validation_data(X,y,valid_len)
         while i < self.iter: 
+            obj = self.compute_obj(self.w)
+            obj_result.append(obj)
+            step = (step)/(i+t0)
+            step_result.append((step))
+            w_iter = []
             for index in rng.permutation(len(self.X)) :
 #                print(index)
                 gradF  = self.compute_grad(self.w , index)
 #                print(gradF)
-                step = (step)/(i+t0)
+                
                 self.w -= np.multiply(step,gradF)
-                i += 1
+                w_iter.append(self.w)
                 if(self.stop.value == 3) : # stop when good perform
  
                     tol = 0.9
@@ -203,14 +217,22 @@ class my_svm(object):
                         min_err = error
                     else :
                         print("break because stop criteria III at iteration :" , i )
+                        stop_sign = True
                         break
-        self.step = step        
-        return self.w    
+            self.w = np.mean(w_iter,0)
+            w_result.append(self.w)
+            if(stop_sign) :
+                break           
+            
+            i += 1
+
+        return w_result , obj_result , step_result
     
  
     
    
-    def predict(self , X , y , w) :
+    def predict(self , X , y,**kwargs) :
+        w = kwargs.get('w', self.w)
         TotalError = 0
         for i in range(len(X)):
             TotalError += (self.produce(X[i] , w) != y[i])
