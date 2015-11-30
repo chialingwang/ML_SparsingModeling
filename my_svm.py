@@ -138,6 +138,7 @@ class my_svm(object):
         step = kwargs.get('step', -1)
         self.w = np.zeros(self.X.shape[1])
         self.stop = kwargs.get('stop', stop.iter)
+        window = kwargs.get('window', 10)
         i = 0
         if(step == -1):
             back_track = True
@@ -155,6 +156,7 @@ class my_svm(object):
             step_result.append((step))
             self.w -= np.multiply(step,gradF)
             w_result.append(list(self.w))
+            count = 0
             i += 1
             if(self.stop.value == 2 ): # stop when opt
                 new_obj = self.compute_obj(self.w)
@@ -166,7 +168,7 @@ class my_svm(object):
 
                 tol = 0.9
                 error = self.predict(pickX , picky)
-                if(error <= tol*min_err):
+                if(error <= tol*min_err or count < window):
                     min_err = error
                 else :
                     print("break because stop criteria III at iteration :" , i )
@@ -189,6 +191,7 @@ class my_svm(object):
         step = kwargs.get('step', 0.11)
         t0 = kwargs.get('t0', 0)
         seed = kwargs.get('seed', 371986)
+        window = kwargs.get('window', 10)
         i = 0
         min_err = sys.maxsize
         rng = np.random.RandomState(seed)
@@ -202,28 +205,31 @@ class my_svm(object):
             step = (step)/(i+t0)
             step_result.append((step))
             w_iter = []
-            for index in rng.permutation(len(self.X)) :
+            count = 0 
+            index = i % self.n
+
 #                print(index)
-                gradF  = self.compute_grad(self.w , index)
+            gradF  = self.compute_grad(self.w , index)
 #                print(gradF)
                 
-                self.w -= np.multiply(step,gradF)
-                w_iter.append(self.w)
-                if(self.stop.value == 3) : # stop when good perform
+            self.w -= np.multiply(step,gradF)
+            w_iter.append(self.w)
+            if(self.stop.value == 3) : # stop when good perform
  
-                    tol = 0.9
-                    error = self.predict(pickX , picky)
-                    if(error <= tol*min_err):
-                        min_err = error
-                    else :
-                        print("break because stop criteria III at iteration :" , i )
-                        stop_sign = True
-                        break
-            self.w = np.mean(w_iter,0)
-            w_result.append(self.w)
-            if(stop_sign) :
-                break           
-            
+                tol = 0.9
+                error = self.predict(pickX , picky)
+                if(error <= tol*min_err or count < window):
+                    min_err = error
+                    count += 1
+                else :
+                    
+                    break
+            if index == 0:
+                permutation  = rng.permutation(self.n)
+                self.X, self.y = self.X[permutation], self.y[permutation]
+                self.w = np.mean(w_iter,0)
+                w_result.append(self.w)
+           
             i += 1
 
         return w_result , obj_result , step_result

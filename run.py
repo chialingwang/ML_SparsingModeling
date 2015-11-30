@@ -3,8 +3,10 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn import grid_search
 import numpy as np
 import image_norm_test as myData;
+import ruleOfThumb
+from my_svm import my_svm,stop
 
-def run(centroid , group_num , train_X , train_y ,test_X , test_y, method='knn' , n_nb = 2):
+def run(centroid , group_num , train_X , train_y ,test_X , test_y, method='knn' , n_nb = 2 , seed = 371986):
     
     # will load data as the patch size defined , 3 means 3*3 = 9 for each patch, and will return the dictionary included:
     # 'data'  (one patch)  , 'target' (the sample of this patch belongs to ) , 'filename' (the file comes from)
@@ -30,4 +32,10 @@ def run(centroid , group_num , train_X , train_y ,test_X , test_y, method='knn' 
         predicted = knn.predict(bofs_test)
 
         score = knn.score(bofs_test,test_y)
+        
+    if(method == "LinearSVM"):
+        svm = my_svm(iter = 100 )
+        w , obj , sp = svm.my_sgd(bofs,train_y, seed = seed , stop = stop.perfor , step = 0.11, t0 = 2, C = 1  )
+        score = 100-svm.predict(bofs_test,test_y)
+            
     return score   
